@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  web:
+    build: web
+    image: web-local:latest
+    container_name: www
+    ports:
+      - "80:80"
+    volumes:
+      - "./data/web:/var/www/html"
+      - "./data/src:/var/www/src"
+    links:
+      - php
+    depends_on:
+      - php
+    env_file:
+      - web.env
+  mydb:
+    image: mariadb:latest
+    container_name: db
+    env_file:
+      - db.env
+    volumes:
+      - "./data/src:/docker-entrypoint-initdb.d"
+      - "./data/db:/var/lib/mysql"
+    depends_on:
+      - web
+  php:
+    build: php
+    image: php-local:7.3-fpm-buster
+    container_name: php73
+    volumes:
+      - "./data/web:/var/www/html"
+  portainer:
+    container_name: portainer-ui
+    image: portainer/portainer:latest
+    ports:
+      - "9000:9000"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./data/portainer/:/data portainer/portainer-ce"
